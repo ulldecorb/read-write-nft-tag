@@ -1,4 +1,4 @@
-/**
+/*
  * Sample React Native App
  * https://github.com/facebook/react-native
  *
@@ -6,7 +6,7 @@
  */
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import NfcManager, {NfcTech} from 'react-native-nfc-manager';
+import NfcManager, {NfcTech, Ndef} from 'react-native-nfc-manager';
 
 // Pre-step, call this before any NFC operations
 NfcManager.start();
@@ -18,7 +18,7 @@ function App() {
 
   const mockNdef = {
     uid: '666',
-    xtra: '4n0th3r br1ck 0n th3 w4ll',
+    xtra: 'servir cafe',
   };
 
   async function readTag() {
@@ -45,28 +45,24 @@ function App() {
     }
   }
 
-  async function writeTag() {
+  async function writeNdef({type, value}) {
+    let result = false;
     try {
-      // register for the NFC tag with NDEF in it
+      // STEP 1
       await NfcManager.requestTechnology(NfcTech.Ndef);
-      // the resolved tag object will contain `ndefMessage` property
-      const tag = await NfcManager.getTag();
-      // Get payload CharCode
-      const payload = tag?.ndefMessage[0].payload;
-      // Convert to string and slice extra characters
-      let payloadString = convertedPayload(payload);
-      const payloadStringCut = convertString(payloadString);
-      // Compile String to Object
-      const payloadObject = JSON.parse(payloadStringCut)[0];
-      // Set payload
-      setNfc(payloadString);
-      setNfcCore(payloadObject);
-      NfcManager.cancelTechnologyRequest();
-    } catch (error) {
-      console.warn('Oops!', error);
-      // stop the nfc scanning
+      const bytes = Ndef.encodeMessage([Ndef.textRecord('Hello NFC')]);
+      if (bytes) {
+        await NfcManager.ndefHandler // STEP 2
+          .writeNdefMessage(bytes); // STEP 3
+        result = true;
+      }
+    } catch (ex) {
+      console.warn(ex);
+    } finally {
+      // STEP 4
       NfcManager.cancelTechnologyRequest();
     }
+    return result;
   }
 
   function convertString(input: string): string {
@@ -84,17 +80,13 @@ function App() {
     return res;
   };
 
-  // const readNdef = () => {
-  //   console.log('hola jana');
-  // };
-
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity onPress={readTag} style={styles.button}>
         <Text style={styles.buttonTitle}>Scan a Tag</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={writeTag} style={styles.button}>
-        <Text style={styles.buttonTitle}>Write a Tag</Text>
+      <TouchableOpacity onPress={writeNdef} style={styles.button}>
+        <Text style={styles.buttonTitle}>Write a Ndef </Text>
       </TouchableOpacity>
       {nfcCore && (
         <View>
