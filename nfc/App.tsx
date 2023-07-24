@@ -1,9 +1,3 @@
-/*
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import NfcManager, {NfcTech, Ndef} from 'react-native-nfc-manager';
@@ -28,12 +22,16 @@ function App() {
       // the resolved tag object will contain `ndefMessage` property
       const tag = await NfcManager.getTag();
       // Get payload CharCode
-      const payload = tag?.ndefMessage[0].payload;
+      const payload: any = tag?.ndefMessage[0].payload;
+      console.log('payload: ', payload);
       // Convert to string and slice extra characters
       let payloadString = convertedPayload(payload);
+      console.log('payloadString: ', payloadString);
       const payloadStringCut = convertString(payloadString);
+      console.log('payloadStringCut: ', payloadStringCut);
       // Compile String to Object
-      const payloadObject = JSON.parse(payloadStringCut)[0];
+      const payloadObject: any = JSON.parse(payloadStringCut);
+      console.log('payloadObject: ', payloadObject.uid);
       // Set payload
       setNfc(payloadString);
       setNfcCore(payloadObject);
@@ -80,13 +78,17 @@ function App() {
     return res;
   };
 
+  // const readNdef = () => {
+  //   console.log('hola jana');
+  // };
+
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity onPress={readTag} style={styles.button}>
         <Text style={styles.buttonTitle}>Scan a Tag</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={writeNdef} style={styles.button}>
-        <Text style={styles.buttonTitle}>Write a Ndef </Text>
+        <Text style={styles.buttonTitle}>Write a Tag</Text>
       </TouchableOpacity>
       {nfcCore && (
         <View>
@@ -117,6 +119,7 @@ const styles = StyleSheet.create({
     padding: 25,
     borderRadius: 8,
     overflow: 'hidden',
+    margin: 5,
   },
   buttonTitle: {
     color: '#fff',
