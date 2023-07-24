@@ -30,7 +30,7 @@ function App() {
       const payloadStringCut = convertString(payloadString);
       console.log('payloadStringCut: ', payloadStringCut);
       // Compile String to Object
-      const payloadObject: any = JSON.parse(payloadStringCut);
+      const payloadObject: any = JSON.parse(payloadString);
       console.log('payloadObject: ', payloadObject.uid);
       // Set payload
       setNfc(payloadString);
@@ -45,10 +45,16 @@ function App() {
 
   async function writeNdef() {
     let result = false;
+    let bytes;
     try {
       // STEP 1
       await NfcManager.requestTechnology(NfcTech.Ndef);
-      const bytes = Ndef.encodeMessage([Ndef.textRecord('servir cafe')]);
+      if (nfcCore.val) {
+        bytes = Ndef.encodeMessage([Ndef.textRecord('Servir cafe')]);
+      } else {
+        bytes = Ndef.encodeMessage([Ndef.textRecord('Transacció fallida')]);
+        setNfc({uid: '2812', val: 0, msg: 'no data yet'});
+      }
       if (bytes) {
         await NfcManager.ndefHandler // STEP 2
           .writeNdefMessage(bytes); // STEP 3
@@ -103,10 +109,12 @@ function App() {
           {nfcCore.val ? (
             <View style={styles.tagInfoBox}>
               <Text>Accepted</Text>
+              <Text>👍🏼</Text>
             </View>
           ) : (
             <View style={styles.tagInfoBox}>
               <Text>Rejected</Text>
+              <Text>⚠</Text>
             </View>
           )}
         </View>
