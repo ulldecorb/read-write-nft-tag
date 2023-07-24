@@ -8,11 +8,11 @@ NfcManager.start();
 // const [nfc.nir, setNfcCore] = useState([]);
 function App() {
   const [nfc, setNfc] = useState('');
-  const [nfcCore, setNfcCore] = useState({uid: '2812', xtra: 'no data yet'});
+  const [nfcCore, setNfcCore] = useState({uid: '2812', msg: 'no data yet'});
 
   const mockNdef = {
     uid: '666',
-    xtra: 'servir cafe',
+    msg: 'servir cafe',
   };
 
   async function readTag() {
@@ -43,12 +43,12 @@ function App() {
     }
   }
 
-  async function writeNdef({type, value}) {
+  async function writeNdef() {
     let result = false;
     try {
       // STEP 1
       await NfcManager.requestTechnology(NfcTech.Ndef);
-      const bytes = Ndef.encodeMessage([Ndef.textRecord('Hello NFC')]);
+      const bytes = Ndef.encodeMessage([Ndef.textRecord('servir cafe')]);
       if (bytes) {
         await NfcManager.ndefHandler // STEP 2
           .writeNdefMessage(bytes); // STEP 3
@@ -97,9 +97,18 @@ function App() {
             <Text>{nfcCore.uid}</Text>
           </View>
           <View style={styles.tagInfoBox}>
-            <Text>Xtra:</Text>
-            <Text>{nfcCore.xtra}</Text>
+            <Text>Message:</Text>
+            <Text>{nfcCore.msg}</Text>
           </View>
+          {nfcCore.val ? (
+            <View style={styles.tagInfoBox}>
+              <Text>Accepted</Text>
+            </View>
+          ) : (
+            <View style={styles.tagInfoBox}>
+              <Text>Rejected</Text>
+            </View>
+          )}
         </View>
       )}
     </View>
