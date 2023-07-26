@@ -27,10 +27,16 @@ function App() {
       // Convert to string and slice extra characters
       let payloadString = convertedPayload(payload);
       console.log('payloadString: ', payloadString);
-      const payloadStringCut = convertString(payloadString);
+
+      // Check message flags and remove if exist
+      const regexPayload = /^.en/;
+      const checkFlag = regexPayload.test(payloadString);
+      const payloadStringCut = checkFlag
+        ? convertString(payloadString)
+        : payloadString;
       console.log('payloadStringCut: ', payloadStringCut);
       // Compile String to Object
-      const payloadObject: any = JSON.parse(payloadString);
+      const payloadObject: any = JSON.parse(payloadStringCut);
       console.log('payloadObject: ', payloadObject.uid);
       // Set payload
       setNfc(payloadString);
@@ -53,7 +59,7 @@ function App() {
         bytes = Ndef.encodeMessage([Ndef.textRecord('Servir cafe')]);
       } else {
         bytes = Ndef.encodeMessage([Ndef.textRecord('Transacció fallida')]);
-        setNfc({uid: '2812', val: 0, msg: 'no data yet'});
+        setNfc({uid: '2812', val: 0, msg: 'no cash'});
       }
       if (bytes) {
         await NfcManager.ndefHandler // STEP 2
